@@ -5,7 +5,7 @@
 
 
 int main(int argc, char *argv[]) {
-	int socketfd = (AF_UNIX, SOCK_STREAM, 0);
+	int socketfd = (AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in serv_addr, peer_addr;
 	bzero((char *) &serv_addr, sizeof(serv_addr));
 	if (argc < 2) {
