@@ -7,12 +7,14 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <vector>
+#include <cstdlib>
 
 class Server {
 public:
 	void init();
 private:
 	void acceptRequests();
+	void sendMsg(int recip, std::string msg);
 	struct sockaddr_in serv_addr, peer_addr;
 	int master_socket;
 	fd_set readfds;
@@ -72,11 +74,19 @@ void Server::acceptRequests() {
 				}
 				else {
 					std::string msg = buffer;
-					std::cout << msg << std::endl;	
+					std::string recipient = msg.substr(0, msg.find(" "));
+					int recip = atoi(recipient.c_str());
+					if (recip < client_socket.size()) {
+						sendMsg(recip, msg.substr(msg.find(" ") + 1));	
+					}	
 				}
 			}
 		}
 	}
+}
+
+void Server::sendMsg(int recip, std::string msg) {
+	write(client_socket[recip], msg.c_str(), msg.length());
 }
 
 int main() {
