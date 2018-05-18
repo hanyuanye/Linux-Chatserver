@@ -29,8 +29,9 @@ void Server::init(int port) {
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(port);
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
-	if (bind(master_socket, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-		std::cout << "Error binding " << errno << std::endl;
+	while (bind(master_socket, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+		port++;
+		serv_addr.sin_port = (htons(port));
 	}
 	
 	listen(master_socket, 5);
@@ -88,7 +89,11 @@ void Server::sendMsg(int recip, std::string msg) {
 int main() {
 	int port;
 	std::cin >> port;
-	Server server;
-	server.init(port);
+	std::vector<Server> servers;
+	for (int i = 0; i < MAX_NUMBER_SERVERS; i++) {
+		Server server;
+		server.init(port+i);
+		servers.push_back(server);
+	}
 	
 }
