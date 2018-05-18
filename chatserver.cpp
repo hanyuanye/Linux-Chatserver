@@ -11,7 +11,7 @@
 
 class Server {
 public:
-	void init();
+	void init(int port);
 private:
 	void acceptRequests();
 	void sendMsg(int recip, std::string msg);
@@ -21,9 +21,7 @@ private:
 	std::vector<int> client_socket;
 };
 
-void Server::init() {
-	int port;
-	std::cin >> port;
+void Server::init(int port) {
 	if ((master_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		std::cout << "Error socket" << std::endl;
 	}
@@ -58,7 +56,6 @@ void Server::acceptRequests() {
 		int activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
 		if (FD_ISSET(master_socket, &readfds)) {
 			int connfd = accept(master_socket, (struct sockaddr*) &peer_addr, &peerlen);
-			std::cout << "New Connection" << std::endl;
 			client_socket.push_back(connfd);
 			continue;
 		}
@@ -68,7 +65,6 @@ void Server::acceptRequests() {
 			int sd = client_socket[i];
 			if (FD_ISSET(sd, &readfds)) {
 				if ((read(sd, buffer, 1024)) == 0) {
-					std::cout << "disconnected" << std::endl;	
 					close(sd);
 					client_socket.erase(client_socket.begin() + i);	
 				}
@@ -90,6 +86,9 @@ void Server::sendMsg(int recip, std::string msg) {
 }
 
 int main() {
+	int port;
+	std::cin >> port;
 	Server server;
-	server.init();
+	server.init(port);
+	
 }
