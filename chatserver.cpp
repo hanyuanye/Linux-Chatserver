@@ -9,6 +9,8 @@
 #include <vector>
 #include <cstdlib>
 
+#define MAX_NUMBER_SERVERS 2
+
 class Server {
 public:
 	void init(int port);
@@ -73,6 +75,7 @@ void Server::acceptRequests() {
 					std::string msg = buffer;
 					std::string recipient = msg.substr(0, msg.find(" "));
 					int recip = atoi(recipient.c_str());
+					std::cout << recip << std::endl;
 					if (recip < client_socket.size()) {
 						sendMsg(recip, msg.substr(msg.find(" ") + 1));	
 					}	
@@ -86,14 +89,29 @@ void Server::sendMsg(int recip, std::string msg) {
 	write(client_socket[recip], msg.c_str(), msg.length());
 }
 
+bool inputAvailable()  
+{
+  struct timeval tv;
+  fd_set fds;
+  tv.tv_sec = 0;
+  tv.tv_usec = 0;
+  FD_ZERO(&fds);
+  FD_SET(STDIN_FILENO, &fds);
+  select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+  return (FD_ISSET(0, &fds));
+}
+
 int main() {
-	int port;
-	std::cin >> port;
-	std::vector<Server> servers;
-	for (int i = 0; i < MAX_NUMBER_SERVERS; i++) {
-		Server server;
-		server.init(port+i);
-		servers.push_back(server);
+	while (true) {
+		if (inputAvailable()) {
+			int port;
+			std::cin >> port;
+			int pid = fork();
+			if (pid == 0) {
+				Server server;
+				server.init(port);
+				exit(0);
+			}
+		}	
 	}
-	
 }
